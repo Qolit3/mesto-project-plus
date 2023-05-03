@@ -27,6 +27,10 @@ app.use((req, res, next) => {
   res.status(HTTP_CODES.NOT_FOUND).send("Не могу найти страницу, по этому запросу")
 })
 
+// Я не понял в каком месте мне использовать instanceof. Точнее я не понял,
+// попадают ли в этот мидлвар ошибки БД. Если да, то наверное, тут можно их и обработать
+// через instanceof
+
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const { statusCode = HTTP_CODES.SERVER_ERROR, message = 'Ошибка сервера' } = err;
 
