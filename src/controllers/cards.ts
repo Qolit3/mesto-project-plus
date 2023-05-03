@@ -1,14 +1,12 @@
 import { NextFunction, Request, Response } from "express"
 import card from "models/card"
+import mongoose from "mongoose"
 import { IReqCustom } from "types_interfaces/i-req-custom"
 
 export const getAllCards = (req: Request, res: Response, next: NextFunction) => {
   card.find({})
+    .populate('user')
     .then(cards => {
-      if(!cards) {
-        throw new NotFoundError(CARD_ERRORS_TEXT.NOT_FOUND)
-      }
-
       res.status(HTTP_CODES.OK).send(cards.map((card) => {
         const { likes, _id, name, link, owner, createdAt } = card
         return {
@@ -29,10 +27,6 @@ export const createCard = (req: Request, res: Response, next: NextFunction) => {
 
   card.create({ name, link, owner: user })
     .then(card => {
-      if(!card) {
-        throw new InvalidDataError(CARD_ERRORS_TEXT.INVALID_DATA)
-      }
-
       const { likes, _id, name, link, owner, createdAt } = card
 
       res.status(HTTP_CODES.OK).send({
@@ -49,6 +43,7 @@ export const createCard = (req: Request, res: Response, next: NextFunction) => {
 
 export const deleteCard = (req: Request, res: Response, next: NextFunction) => {
   card.findByIdAndDelete(req.params.cardId)
+    .populate('user')
     .then(card => {
       if(!card) {
         throw new NotFoundError(CARD_ERRORS_TEXT.NOT_FOUND)
@@ -74,6 +69,7 @@ export const putLike = (req: IReqCustom, res: Response, next: NextFunction) => {
     { $addToSet: { likes: req.user?._id } },
     { new: true },
     )
+    .populate('user')
     .then(card => {
       if(!card) {
         throw new NotFoundError(CARD_ERRORS_TEXT.NOT_FOUND)
@@ -99,6 +95,7 @@ export const deleteLike = (req: IReqCustom, res: Response, next: NextFunction) =
     { $pull: { likes: req.user?._id } },
     { new: true },
     )
+    .populate('user')
     .then(card => {
       if(!card) {
         throw new NotFoundError(CARD_ERRORS_TEXT.NOT_FOUND)

@@ -1,8 +1,8 @@
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
-import userRouter from './routers/user'
+import allRoutes from 'routers/router';
 import { IReqCustom } from 'types_interfaces/i-req-custom';
-import cardRouter from 'routers/card';
+
 
 const app = express();
 
@@ -21,8 +21,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/users', userRouter)
-app.use('/cards', cardRouter)
+app.use('/', allRoutes)
+
+app.use((req, res, next) => {
+  res.status(HTTP_CODES.NOT_FOUND).send("Не могу найти страницу, по этому запросу")
+})
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const { statusCode = HTTP_CODES.SERVER_ERROR, message = 'Ошибка сервера' } = err;
