@@ -21,20 +21,22 @@ app.use((req, res, next) => {
   next();
 });
 
+mongoose.Error
+
 app.use('/', allRoutes)
-
-app.use((req, res, next) => {
-  res.status(HTTP_CODES.NOT_FOUND).send("Не могу найти страницу, по этому запросу")
-})
-
-// Я не понял в каком месте мне использовать instanceof. Точнее я не понял,
-// попадают ли в этот мидлвар ошибки БД. Если да, то наверное, тут можно их и обработать
-// через instanceof
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const { statusCode = HTTP_CODES.SERVER_ERROR, message = 'Ошибка сервера' } = err;
+  if(err instanceof mongoose.Error.ValidationError) {
+    res.status(HTTP_CODES.INVALID_DATA).send({ message: 'Данные не соответсвуют схеме' })
+  } else if(err instanceof mongoose.Error.CastError) {
+    res.status(HTTP_CODES.INVALID_DATA).send({ message: 'Невалидный ID'})
+  } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
+    res.status(HTTP_CODES.NOT_FOUND).send({ message: 'Документ не найдены'})
+  } else {
+    res.status(statusCode).send({ message: message})
+  }
 
-  res.status(statusCode).send({ message: message})
 })
 
 

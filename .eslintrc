@@ -1,3 +1,4 @@
+{
     "env": {
         "es2021": true,
         "node": true
@@ -31,11 +32,12 @@
     "rules": {
         "import/extensions": [
             "error",
+            { "allow": [ "_id" ] },
             "ignorePackages",
             {
                 "js": "never",
                 "ts": "never"
             }
         ]
-    },
+    }
 }

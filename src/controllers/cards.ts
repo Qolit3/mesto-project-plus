@@ -1,11 +1,10 @@
 import { NextFunction, Request, Response } from "express"
 import card from "models/card"
-import mongoose from "mongoose"
 import { IReqCustom } from "types_interfaces/i-req-custom"
 
 export const getAllCards = (req: Request, res: Response, next: NextFunction) => {
   card.find({})
-    .populate('user')
+    .populate(['owner', 'likes'])
     .then(cards => {
       res.status(HTTP_CODES.OK).send(cards.map((card) => {
         const { likes, _id, name, link, owner, createdAt } = card
@@ -43,6 +42,7 @@ export const createCard = (req: Request, res: Response, next: NextFunction) => {
 
 export const deleteCard = (req: Request, res: Response, next: NextFunction) => {
   card.findByIdAndDelete(req.params.cardId)
+    .orFail()
     .populate('user')
     .then(card => {
       if(!card) {
@@ -69,6 +69,7 @@ export const putLike = (req: IReqCustom, res: Response, next: NextFunction) => {
     { $addToSet: { likes: req.user?._id } },
     { new: true },
     )
+    .orFail()
     .populate('user')
     .then(card => {
       if(!card) {
@@ -95,6 +96,7 @@ export const deleteLike = (req: IReqCustom, res: Response, next: NextFunction) =
     { $pull: { likes: req.user?._id } },
     { new: true },
     )
+    .orFail()
     .populate('user')
     .then(card => {
       if(!card) {

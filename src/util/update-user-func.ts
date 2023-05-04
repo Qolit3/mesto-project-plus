@@ -4,6 +4,7 @@ import { IReqCustom } from "types_interfaces/i-req-custom";
 
 export const updateUser = (req: IReqCustom, res: Response, next: NextFunction, info: info) => {
   user.findByIdAndUpdate(req.user?._id, info, { new: true, runValidators: true })
+    .orFail()
     .then(user => {
       if(user) {
         const { name, about, avatar, _id } = user;

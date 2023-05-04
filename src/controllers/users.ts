@@ -14,6 +14,7 @@ export const getAllUsers = (req: Request, res: Response, next: NextFunction) => 
 
 export const getUserById = (req: Request, res: Response, next: NextFunction) => {
   user.findById(req.params.id)
+    .orFail()
     .then(user => {
       if(!user) {
         throw new NotFoundError(USER_ERRORS_TEXT.NOT_FOUND)
