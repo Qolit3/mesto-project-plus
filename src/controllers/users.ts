@@ -2,7 +2,8 @@ import { NextFunction, Request, Response } from "express"
 import user from "models/user"
 import { IReqCustom } from "types_interfaces/i-req-custom"
 import { updateUser } from "util/update-user-func"
-
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken'
 
 export const getAllUsers = (req: Request, res: Response, next: NextFunction) => {
   user.find({})
@@ -28,21 +29,39 @@ export const getUserById = (req: Request, res: Response, next: NextFunction) => 
     .catch(next)
 }
 
-export const createUser = (req: Request, res: Response, next: NextFunction) => {
-  const { name, about, avatar } = req.body;
-
-  user.create({ name, about, avatar })
+export const getClientsUser = (req: IReqCustom, res: Response, next: NextFunction) => {
+  return user.findById(req.user?._id)
+    .orFail()
     .then(user => {
       const { name, about, avatar, _id } = user;
 
       res.status(HTTP_CODES.OK).send({
-          name: name,
-          about: about,
-          avatar: avatar,
-          _id: _id
-        })
+        name: name,
+        about: about,
+        avatar: avatar,
+        _id: _id
+      })
     })
     .catch(next)
+}
+
+export const createUser = (req: Request, res: Response, next: NextFunction) => {
+  const { name, about, avatar, email, password } = req.body;
+
+  bcrypt.hash(password, 10)
+    .then(hash => user.create({ name, about, avatar, email, password: hash })
+      .then(user => {
+        const { name, about, avatar, _id } = user;
+
+        res.status(HTTP_CODES.OK).send({
+            name: name,
+            about: about,
+            avatar: avatar,
+            _id: _id
+          })
+      })
+      .catch(next)
+    )
 }
 
 export const updateUserInfo = (req: IReqCustom, res: Response, next: NextFunction) => {
@@ -54,5 +73,27 @@ export const updateUserInfo = (req: IReqCustom, res: Response, next: NextFunctio
 export const updateUserAvatar = (req: IReqCustom, res: Response, next: NextFunction) => {
   const { avatar } = req.body;
 
+  var expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+  var regex = new RegExp(expression);
+
+  if (!avatar.match(regex)) {
+    throw new InvalidDataError(USER_ERRORS_TEXT.INVALID_DATA)
+  }
+
   updateUser(req, res, next, { avatar })
 }
+
+export const login = (req: IReqCustom, res: Response, next: NextFunction) => {
+  const { email, password } = req.body;
+
+  return user.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id}, 'key', { expiresIn: '7d'})
+
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true
+      }).end();
+    })
+    .catch(next)
+};

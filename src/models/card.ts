@@ -1,7 +1,16 @@
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
+import { IUser } from "./user";
 
-const cardSchema = new mongoose.Schema({
+export interface ICard {
+  name: string,
+  link: string,
+  owner: IUser,
+  likes: [IUser],
+  createdAt: Date
+}
+
+const cardSchema = new mongoose.Schema<ICard>({
   name: {
     type: String,
     required: true,
@@ -14,7 +23,7 @@ const cardSchema = new mongoose.Schema({
   },
   owner: {
     required: true,
-    type: ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'user'
   },
   likes: {
@@ -28,4 +37,4 @@ const cardSchema = new mongoose.Schema({
   }
 });
 
-export default mongoose.model('card', cardSchema);
+export default mongoose.model<ICard>('card', cardSchema);

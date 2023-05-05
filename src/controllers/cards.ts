@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express"
-import card from "models/card"
+import card, { ICard } from "models/card"
+import user from "models/user"
 import { IReqCustom } from "types_interfaces/i-req-custom"
 
 export const getAllCards = (req: Request, res: Response, next: NextFunction) => {
@@ -21,31 +22,40 @@ export const getAllCards = (req: Request, res: Response, next: NextFunction) => 
     .catch(next)
 }
 
-export const createCard = (req: Request, res: Response, next: NextFunction) => {
-  const { name, link, user } = req.body;
+export const createCard = (req: IReqCustom, res: Response, next: NextFunction) => {
+  const { name, link} = req.body;
 
-  card.create({ name, link, owner: user })
-    .then(card => {
-      const { likes, _id, name, link, owner, createdAt } = card
+  user.findById(req.user?._id)
+    .orFail()
+    .then(user => {
+      card.create({ name, link, owner: user })
+        .then(card => {
+          const { likes, _id, name, link, owner, createdAt } = card
 
-      res.status(HTTP_CODES.OK).send({
-          likes: likes,
-          _id: _id,
-          name: name,
-          link: link,
-          owner: owner,
-          createAt: createdAt
+          res.status(HTTP_CODES.OK).send({
+              likes: likes,
+              _id: _id,
+              name: name,
+              link: link,
+              owner: owner,
+              createAt: createdAt
+            })
         })
+        .catch(next)
     })
     .catch(next)
 }
 
-export const deleteCard = (req: Request, res: Response, next: NextFunction) => {
+export const deleteCard = (req: IReqCustom, res: Response, next: NextFunction) => {
   card.findByIdAndDelete(req.params.cardId)
     .orFail()
-    .populate('user')
+    .populate(["owner", "likes"])
     .then(card => {
       const { likes, _id, name, link, owner, createdAt } = card
+
+      if(owner._id !== req.user?._id) {
+        return
+      }
 
       res.status(HTTP_CODES.OK).send({
         likes: likes,
@@ -66,7 +76,7 @@ export const putLike = (req: IReqCustom, res: Response, next: NextFunction) => {
     { new: true },
     )
     .orFail()
-    .populate('user')
+    .populate(["owner", "likes"])
     .then(card => {
       const { likes, _id, name, link, owner, createdAt } = card
 
@@ -89,7 +99,7 @@ export const deleteLike = (req: IReqCustom, res: Response, next: NextFunction) =
     { new: true },
     )
     .orFail()
-    .populate('user')
+    .populate(["owner", "likes"])
     .then(card => {
       const { likes, _id, name, link, owner, createdAt } = card
 
