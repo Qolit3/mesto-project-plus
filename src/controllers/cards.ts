@@ -45,10 +45,6 @@ export const deleteCard = (req: Request, res: Response, next: NextFunction) => {
     .orFail()
     .populate('user')
     .then(card => {
-      if(!card) {
-        throw new NotFoundError(CARD_ERRORS_TEXT.NOT_FOUND)
-      }
-
       const { likes, _id, name, link, owner, createdAt } = card
 
       res.status(HTTP_CODES.OK).send({
@@ -72,10 +68,6 @@ export const putLike = (req: IReqCustom, res: Response, next: NextFunction) => {
     .orFail()
     .populate('user')
     .then(card => {
-      if(!card) {
-        throw new NotFoundError(CARD_ERRORS_TEXT.NOT_FOUND)
-      }
-
       const { likes, _id, name, link, owner, createdAt } = card
 
       res.status(HTTP_CODES.OK).send({
@@ -99,10 +91,6 @@ export const deleteLike = (req: IReqCustom, res: Response, next: NextFunction) =
     .orFail()
     .populate('user')
     .then(card => {
-      if(!card) {
-        throw new NotFoundError(CARD_ERRORS_TEXT.NOT_FOUND)
-      }
-
       const { likes, _id, name, link, owner, createdAt } = card
 
       res.status(HTTP_CODES.OK).send({

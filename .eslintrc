@@ -32,12 +32,15 @@
     "rules": {
         "import/extensions": [
             "error",
-            { "allow": [ "_id" ] },
             "ignorePackages",
             {
                 "js": "never",
                 "ts": "never"
             }
+        ],
+        "no-underscore-dangle": [
+          "error",
+          { "allow": [ "_id" ] }
         ]
     }
 }
