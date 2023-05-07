@@ -1,12 +1,12 @@
 import express, { NextFunction, Request, Response } from 'express';
-import { errors } from 'celebrate';
+import {  errors } from 'celebrate';
 import { errorLogger, requestLogger } from 'middlewares/logger';
 import mongoose from 'mongoose';
 import allRoutes from 'routers/router';
 import auth from 'middlewares/auth';
 import authRouter from 'routers/authRouter';
 
-
+//Простите, не успеваю зарефакторить комментарии "можно лучше". Сделаю уже после сдачи.
 const app = express();
 
 mongoose.connect('mongodb://localhost:27017/mestodb')

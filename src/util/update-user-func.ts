@@ -6,8 +6,7 @@ export const updateUser = (req: IReqCustom, res: Response, next: NextFunction, i
   user.findByIdAndUpdate(req.user?._id, info, { new: true, runValidators: true })
     .orFail()
     .then(user => {
-      if(user) {
-        const { name, about, avatar, _id } = user;
+      const { name, about, avatar, _id } = user;
 
       res.status(HTTP_CODES.OK).send({
         name: name,
@@ -15,7 +14,6 @@ export const updateUser = (req: IReqCustom, res: Response, next: NextFunction, i
         avatar: avatar,
         _id: _id
       })
-      }
     })
     .catch(next)
 }

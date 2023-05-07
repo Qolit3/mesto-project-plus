@@ -6,7 +6,7 @@ export default (req: IReqCustom, res: Response, next: NextFunction) => {
   const { authorization } = req.headers ;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return res.status(401).send({ message: USER_ERRORS_TEXT.FAILED_AUTHORIZATION });
+    throw new FailedAuthorization(USER_ERRORS_TEXT.FAILED_AUTHORIZATION)
   }
   if(authorization) {
     const token = authorization.replace('Bearer ', '');

@@ -73,13 +73,6 @@ export const updateUserInfo = (req: IReqCustom, res: Response, next: NextFunctio
 export const updateUserAvatar = (req: IReqCustom, res: Response, next: NextFunction) => {
   const { avatar } = req.body;
 
-  var expression = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
-  var regex = new RegExp(expression);
-
-  if (!avatar.match(regex)) {
-    throw new InvalidDataError(USER_ERRORS_TEXT.INVALID_DATA)
-  }
-
   updateUser(req, res, next, { avatar })
 }
 

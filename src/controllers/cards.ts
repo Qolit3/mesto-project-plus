@@ -47,15 +47,26 @@ export const createCard = (req: IReqCustom, res: Response, next: NextFunction) =
 }
 
 export const deleteCard = (req: IReqCustom, res: Response, next: NextFunction) => {
-  card.findByIdAndDelete(req.params.cardId)
+  let isOwner = false
+
+  card.findById(req.params.cardId)
+    .orFail()
+    .populate(["owner", "likes"])
+    .then(card => {
+      const { owner } = card
+
+      if(owner._id === req.user?._id) {
+        isOwner = true;
+      }
+    })
+    .catch(next)
+
+  if(isOwner) {
+    card.findByIdAndDelete(req.params.cardId)
     .orFail()
     .populate(["owner", "likes"])
     .then(card => {
       const { likes, _id, name, link, owner, createdAt } = card
-
-      if(owner._id !== req.user?._id) {
-        return
-      }
 
       res.status(HTTP_CODES.OK).send({
         likes: likes,
@@ -67,6 +78,7 @@ export const deleteCard = (req: IReqCustom, res: Response, next: NextFunction) =
       })
     })
     .catch(next)
+  }
 }
 
 export const putLike = (req: IReqCustom, res: Response, next: NextFunction) => {
