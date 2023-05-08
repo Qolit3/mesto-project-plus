@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { IErrorCustom } from "types_interfaces/i-error-custom";
 import validator from 'validator';
 import bcrypt from 'bcrypt';
+import { MongoError } from "mongodb";
 
 export interface IUser {
   name: string;
@@ -47,20 +48,24 @@ const userSchema = new mongoose.Schema<IUser, UserModel>({
   }
 });
 
+userSchema.post('save', {errorHandler: true}, (err, doc, next) => {
+  if(err.name === 'MongoServerError' && (err as MongoError).code === 11000) {
+    next(new InvalidDataError('Пользователь с таким email уже существует'))
+  } else {
+    next()
+  }
+})
+
 userSchema.static('findUserByCredentials', function findUserByCredentials(email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        const err: IErrorCustom = new Error(USER_ERRORS_TEXT.FAILED_LOGIN)
-        err.statusCode = 401;
-        throw err
+        throw new FailedAuthorization(USER_ERRORS_TEXT.FAILED_LOGIN)
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            const err: IErrorCustom = new Error(USER_ERRORS_TEXT.FAILED_LOGIN)
-            err.statusCode = 401;
-            throw err
+            throw new FailedAuthorization(USER_ERRORS_TEXT.FAILED_LOGIN)
           }
 
           return user;

@@ -6,7 +6,7 @@ export default (req: IReqCustom, res: Response, next: NextFunction) => {
   const { authorization } = req.headers ;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    throw new FailedAuthorization(USER_ERRORS_TEXT.FAILED_AUTHORIZATION)
+    return next(new FailedAuthorization(USER_ERRORS_TEXT.FAILED_AUTHORIZATION))
   }
   if(authorization) {
     const token = authorization.replace('Bearer ', '');
@@ -14,12 +14,11 @@ export default (req: IReqCustom, res: Response, next: NextFunction) => {
     try {
       payload = jwt.verify(token,'key')
     } catch(err) {
-      return res.status(HTTP_CODES.UNAUTHORIZED).send({ message: USER_ERRORS_TEXT.FAILED_AUTHORIZATION })
+      return next(new FailedAuthorization(USER_ERRORS_TEXT.FAILED_AUTHORIZATION))
     }
     if(req.user) {
       req.user._id = payload;
     }
-
     next()
   }
 };

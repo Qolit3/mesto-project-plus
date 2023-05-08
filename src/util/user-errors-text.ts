@@ -3,5 +3,6 @@ enum USER_ERRORS_TEXT {
   INVALID_DATA = 'Не удалось создать или обновить пользователя из-за некорректных переданных данных',
   FAILED_LOGIN = 'Неправильные почта и пароль',
   FAILED_AUTHORIZATION = 'Неверный токен',
-  NON_UNIQUE_EMAIL = 'Пользователь с таким E-mail уже есть'
+  NON_UNIQUE_EMAIL = 'Пользователь с таким E-mail уже есть',
+  NOT_OWNER = 'Удаление не своеей карточки'
 }
